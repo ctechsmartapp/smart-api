@@ -1,0 +1,49 @@
+// models/User.js
+import { DataTypes } from 'sequelize'
+import sequelize from '../config/db.js';
+
+const User = sequelize.define(
+  "User",
+  {
+    id: {
+      type: DataTypes.BIGINT,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    email: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true,
+      },
+    },
+    password_hash: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    firstname: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    lastname: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
+    tableName: "users",
+    timestamps: false, // disable default createdAt/updatedAt
+    underscored: true, // use snake_case columns
+  }
+);
+
+export default User;
