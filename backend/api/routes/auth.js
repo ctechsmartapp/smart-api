@@ -1,6 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
+import { generateAccessToken, getRefreshToken} from "../utils/authUtils.js";
 
 const router = express.Router();
 
@@ -33,14 +34,19 @@ router.post("/signup", async (req, res) => {
             lastname,
         });
 
+        const accessToken = generateAccessToken(user)
+        const refreshToken = getRefreshToken();
+
         res.status(201).json({
-        message: "User registered successfully",
-        user: {
+          message: "User registered successfully",
+          user: {
             id: user.id,
             email: user.email,
             firstname: user.firstname,
             lastname: user.lastname,
-        },
+          },
+          accessToken: accessToken, 
+          refreshToken: refreshToken
         });
     } catch (err) {
         console.error("Signup error:", err);
@@ -51,6 +57,7 @@ router.post("/signup", async (req, res) => {
 // POST /login
 router.post("/login", async (req, res) => {
   console.log("login req received");
+
   try {
     const { email, password } = req.body;
 
@@ -58,20 +65,23 @@ router.post("/login", async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
-
+    
     // check if user exists
     const user = await User.findOne({ where: { email } });
+    
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-
+    
     // compare password
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
+    
+    const accessToken = generateAccessToken(user)
+    const refreshToken = getRefreshToken();
 
-    // optional: generate JWT token here (not included in this snippet)
     res.status(200).json({
       message: "Login successful",
       user: {
@@ -80,6 +90,8 @@ router.post("/login", async (req, res) => {
         firstname: user.firstname,
         lastname: user.lastname,
       },
+      accessToken: accessToken, 
+      refreshToken: refreshToken
     });
   } catch (err) {
     console.error("Login error:", err);

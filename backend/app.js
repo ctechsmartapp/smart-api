@@ -5,8 +5,6 @@ import bodyParser from 'body-parser';
 import employeeRoutes from './api/routes/employees.js'
 import clientRoutes from './api/routes/client.js'
 import authRoutes from './api/routes/auth.js'
-import sqlite3 from 'sqlite3';
-
 
 /* This is file is used like Middleware */
 
