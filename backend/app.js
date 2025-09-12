@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import employeeRoutes from './api/routes/employees.js'
 import clientRoutes from './api/routes/client.js'
 import authRoutes from './api/routes/auth.js'
+import userRoutes from './api/routes/users.js'
 
 /* This is file is used like Middleware */
 
@@ -27,7 +28,7 @@ app.use((req,res,next)=>{
 app.use('/employees',employeeRoutes);
 app.use('/client',clientRoutes);
 app.use('/auth',authRoutes)
-
+app.use('/users',userRoutes)
 
 app.use((req,res,next)=>{
    const error = new Error('Not found');

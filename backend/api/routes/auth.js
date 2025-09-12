@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
-import { generateAccessToken, getRefreshToken} from "../utils/authUtils.js";
+import { authenticateRefreshToken, generateAccessToken, getRefreshToken} from "../utils/authUtils.js";
 
 const router = express.Router();
 
@@ -35,7 +35,7 @@ router.post("/signup", async (req, res) => {
         });
 
         const accessToken = generateAccessToken(user)
-        const refreshToken = getRefreshToken();
+        const refreshToken = getRefreshToken(user);
 
         res.status(201).json({
           message: "User registered successfully",
@@ -79,8 +79,8 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     
-    const accessToken = generateAccessToken(user)
-    const refreshToken = getRefreshToken();
+    const accessToken = generateAccessToken(user);
+    const refreshToken = getRefreshToken(user);
 
     res.status(200).json({
       message: "Login successful",
@@ -98,5 +98,18 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// Get new access token
+router.post("/refreshToken", authenticateRefreshToken , async(req,res) => {
+    try{
+        const user = req.user;
+        const accessToken = generateAccessToken(user);
+        res.status(200).json({ accessToken: accessToken });
+    }
+    catch(err){
+        console.error("Token error:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+})
 
 export default router;
