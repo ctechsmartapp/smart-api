@@ -1,117 +1,85 @@
-import * as React from 'react';
+import * as React from "react";
+import { CssVarsProvider } from "@mui/joy/styles";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import Sheet from "@mui/joy/Sheet";
+import logo from "./assets/image/CTI.png";
 
-import Sheet from '@mui/joy/Sheet';
-import FormControl from '@mui/joy/FormControl';
-import FormLabel from '@mui/joy/FormLabel';
-import Input from '@mui/joy/Input';
-import Button from '@mui/joy/Button';
-import Link from '@mui/joy/Link';
-import { CssVarsProvider, useColorScheme } from '@mui/joy/styles';
-import Select from '@mui/joy/Select';
-import Option from '@mui/joy/Option';
-import Typography from '@mui/joy/Typography';
-
-import logo from './assets/image/CTI.png';
-
-function ModeToggle() {
-  const { mode, setMode } = useColorScheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  // necessary for server-side rendering
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
-  return (
-    <Select
-      value={mode}
-      onChange={(event, newMode) => {
-        setMode(newMode);
-      }}
-      sx={{ width: 'max-content' }}
-    >
-      <Option value="system">System</Option>
-      <Option value="light">Light</Option>
-      <Option value="dark">Dark</Option>
-    </Select>
-  );
-}
+import ModeToggle from "./ModeToggle";
+import LoginForm from "./components/LoginForm";
+import SignupForm from "./components/SignupForm";
+import HomePage from "./components/HomePage";
 
 export default function App() {
+  const [showLogin, setShowLogin] = React.useState(true);
+  const [token, setToken] = React.useState(localStorage.getItem("token"));
+
   return (
     <CssVarsProvider>
-      {/* Logo fixed to top-left outside the Sheet */}
-      <img
-        src={logo}
-        alt="Logo"
-        style={{
-          position: 'absolute',
-          top: 16,
-          left: 16,
-          height: 100,
-          width: 400,
-        
-        }}
-      />
+      <BrowserRouter>
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ position: "absolute", top: 16, left: 16, height: 100, width: 400 }}
+        />
 
-      <Sheet
-        sx={{
-          width: 300,
-          mx: 'auto', // margin left & right
-          my: 8, // margin top & bottom (pushed down to avoid overlap with logo)
-          py: 3, // padding top & bottom
-          px: 2, // padding left & right
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          borderRadius: 'sm',
-          boxShadow: 'md',
-        }}
-      >
-        <div>
-          <Typography level="h4" component="h1">
-            Welcome!
-          </Typography>
-          <Typography level="body-sm">Sign in to continue.</Typography>
-        </div>
-
-        <FormControl>
-          <FormLabel>Email</FormLabel>
-          <Input
-            name="email"
-            type="email"
-            placeholder="example@email.com"
+        <Routes>
+          {/* Public Route */}
+          <Route
+            path="/"
+            element={
+              token ? (
+                <Navigate to="/home" />
+              ) : (
+                <Sheet
+                  sx={{
+                    width: 300,
+                    mx: "auto",
+                    my: 8,
+                    py: 3,
+                    px: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    borderRadius: "sm",
+                    boxShadow: "md",
+                  }}
+                >
+                  {showLogin ? (
+                    <LoginForm
+                      onToggle={() => setShowLogin(false)}
+                      onAuth={(t) => setToken(t)}
+                    />
+                  ) : (
+                    <SignupForm
+                      onToggle={() => setShowLogin(true)}
+                      onAuth={(t) => setToken(t)}
+                    />
+                  )}
+                </Sheet>
+              )
+            }
           />
-        </FormControl>
 
-        <FormControl>
-          <FormLabel>Password</FormLabel>
-          <Input
-            name="password"
-            type="password"
-            placeholder="password"
+          {/* Protected Route */}
+          <Route
+            path="/home"
+            element={
+              token ? (
+                <HomePage onLogout={() => setToken(null)} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
-        </FormControl>
 
-        <Button sx={{ mt: 1 }}>Log in</Button>
+          {/* Catch all unmatched paths */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
 
-        <Typography
-          endDecorator={<Link href="/sign-up">Sign up</Link>}
-          fontSize="sm"
-          sx={{ alignSelf: 'center' }}
-        >
-          Don't have an account?
-        </Typography>
-      </Sheet>
-
-      <div style={{ position: 'absolute', top: 16, right: 16 }}>
-        <ModeToggle />
-      </div>
+        {/* <div style={{ position: "absolute", top: 16, right: 16 }}>
+          <ModeToggle />
+        </div> */}
+      </BrowserRouter>
     </CssVarsProvider>
   );
 }
-
