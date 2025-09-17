@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import { authenticateRefreshToken, generateAccessToken, getRefreshToken} from "../utils/authUtils.js";
+import { sendWelcomeEmail } from "../utils/email.js";
 
 const router = express.Router();
 
@@ -48,6 +49,9 @@ router.post("/signup", async (req, res) => {
           accessToken: accessToken, 
           refreshToken: refreshToken
         });
+
+        await sendWelcomeEmail(user.email, user.firstname);
+
     } catch (err) {
         console.error("Signup error:", err);
         res.status(500).json({ error: "Internal Server Error" });
@@ -101,6 +105,7 @@ router.post("/login", async (req, res) => {
 
 // Get new access token
 router.post("/refreshToken", authenticateRefreshToken , async(req,res) => {
+    console.log("refresh token req received");
     try{
         const user = req.user;
         const accessToken = generateAccessToken(user);
