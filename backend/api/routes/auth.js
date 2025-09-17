@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import { authenticateRefreshToken, generateAccessToken, getRefreshToken} from "../utils/authUtils.js";
-import { sendWelcomeEmail } from "../utils/email.js";
+import { sendEmail, sendWelcomeEmail } from "../utils/email.js";
 
 const router = express.Router();
 
@@ -115,6 +115,71 @@ router.post("/refreshToken", authenticateRefreshToken , async(req,res) => {
         console.error("Token error:", err);
         res.status(500).json({ error: "Internal Server Error" });
     }
-})
+});
+
+// Request OTP
+router.post("/forgotPassword", async (req, res) => {
+  const { email } = req.body;
+  console.log(email);
+  const user = await User.findOne({ where: { email } });
+  console.log(user);
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString(); 
+  const hashedOtp = await bcrypt.hash(otpCode, 10);
+
+  // Save OTP in user's row with expiry
+  await user.update({
+    otp_hash: hashedOtp,
+    otp_expiration: new Date(Date.now() + 5 * 60 * 1000), // 5 min expiry
+  });
+
+  const subject = "Password Reset OTP";
+  const body = `<h3>Hi ${user.firstname},</h3>
+           <p>Your OTP code is ${otpCode}. It will expire in 5 minutes.</p>`;
+  
+  // Send email
+  sendEmail(user.email, subject, body);
+
+  res.status(201).json({ message: "OTP sent to email" });
+});
+
+// Verify OTP
+router.post("/verifyOTP", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    // Check if OTP exists
+    if (!user.otp_hash || !user.otp_expiration) {
+      return res.status(400).json({ error: "No OTP generated" });
+    }
+
+    // Check expiry
+    if (new Date() > user.otp_expiration) {
+      return res.status(400).json({ error: "OTP expired" });
+    }
+
+    // Compare OTP with hash
+    const isMatch = await bcrypt.compare(otp, user.otp_hash);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    // OTP verified → clear fields
+    await user.update({ otp_hash: null, otp_expiration: null });
+
+    return res.status(201).json({ message: "OTP verified successfully" });
+
+  } catch (err) {
+    console.error("Verify OTP error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 export default router;

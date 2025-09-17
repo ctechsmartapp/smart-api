@@ -38,6 +38,14 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    otp_hash: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    otp_expiration: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "users",
