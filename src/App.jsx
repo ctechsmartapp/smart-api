@@ -1,85 +1,82 @@
 import * as React from "react";
 import { CssVarsProvider } from "@mui/joy/styles";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import Sheet from "@mui/joy/Sheet";
-import logo from "./assets/image/CTI.png";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import ModeToggle from "./ModeToggle";
-import LoginForm from "./components/LoginForm";
-import SignupForm from "./components/SignupForm";
-import HomePage from "./components/HomePage";
+import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
+
+import AuthLayout from "./layouts/AuthLayout";
+import MainLayout from "./layouts/MainLayout";
+
+import LoginForm from "./features/auth/LoginForm";
+import SignupForm from "./features/auth/SignupForm";
+import ForgotPasswordForm from "./features/auth/ForgotPasswordForm";
+import HomePage from "./features/home/HomePage";
+import OTPForm from "./features/auth/OTPForm";
+import ResetPasswordForm from "./features/auth/ResetPassword";
 
 export default function App() {
-  const [showLogin, setShowLogin] = React.useState(true);
-  const [token, setToken] = React.useState(localStorage.getItem("token"));
-
   return (
     <CssVarsProvider>
-      <BrowserRouter>
-        <img
-          src={logo}
-          alt="Logo"
-          style={{ position: "absolute", top: 16, left: 16, height: 100, width: 400 }}
-        />
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Auth Routes */}
+            <Route
+              path="/"
+              element={
+                <AuthLayout>
+                  <LoginForm />
+                </AuthLayout>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <AuthLayout>
+                  <SignupForm />
+                </AuthLayout>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <AuthLayout>
+                  <ForgotPasswordForm />
+                </AuthLayout>
+              }
+            />
+            <Route
+              path="/verify-otp"
+              element={
+                <AuthLayout>
+                  <OTPForm />
+                </AuthLayout>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <AuthLayout>
+                  <ResetPasswordForm/>
+                </AuthLayout>
+              }
+            />
 
-        <Routes>
-          {/* Public Route */}
-          <Route
-            path="/"
-            element={
-              token ? (
-                <Navigate to="/home" />
-              ) : (
-                <Sheet
-                  sx={{
-                    width: 300,
-                    mx: "auto",
-                    my: 8,
-                    py: 3,
-                    px: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
-                    borderRadius: "sm",
-                    boxShadow: "md",
-                  }}
-                >
-                  {showLogin ? (
-                    <LoginForm
-                      onToggle={() => setShowLogin(false)}
-                      onAuth={(t) => setToken(t)}
-                    />
-                  ) : (
-                    <SignupForm
-                      onToggle={() => setShowLogin(true)}
-                      onAuth={(t) => setToken(t)}
-                    />
-                  )}
-                </Sheet>
-              )
-            }
-          />
-
-          {/* Protected Route */}
-          <Route
-            path="/home"
-            element={
-              token ? (
-                <HomePage onLogout={() => setToken(null)} />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
-
-          {/* Catch all unmatched paths */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-
-        {/* <div style={{ position: "absolute", top: 16, right: 16 }}>
-          <ModeToggle />
-        </div> */}
-      </BrowserRouter>
+            {/* Protected Routes */}
+            <Route
+              path="/home"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <HomePage />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </CssVarsProvider>
   );
 }

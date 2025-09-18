@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext} from "react";
 import { FormControl, FormLabel, Input, Button, Typography } from "@mui/joy";
-import { signup } from "../services/auth";
+import { signup } from "../../services/auth";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
-export default function SignupForm({ onToggle, onAuth }) {
+export default function SignupForm() {
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -12,6 +13,8 @@ export default function SignupForm({ onToggle, onAuth }) {
   });
 
   const navigate = useNavigate();
+  const { setToken } = useContext(AuthContext);
+  
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,8 +29,8 @@ export default function SignupForm({ onToggle, onAuth }) {
       );
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
-      onAuth(data.accessToken);
-      navigate("/home"); // redirect after signup
+      setToken(data.accessToken);
+      navigate("/home"); 
     } catch (err) {
       alert(err.message);
     }
@@ -85,7 +88,7 @@ export default function SignupForm({ onToggle, onAuth }) {
       <Typography
         fontSize="sm"
         sx={{ alignSelf: "center", cursor: "pointer" }}
-        onClick={onToggle}
+        onClick={() => navigate("/")}
       >
         Already have an account? Log in
       </Typography>

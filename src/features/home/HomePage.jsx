@@ -1,13 +1,15 @@
 // src/components/HomePage.jsx
 import React, { useState, useEffect } from "react";
-import { getUserDetails } from "../services/user";
+import { getUserDetails } from "../../services/user";
 import { Button, Grid, Typography } from "@mui/joy";
-import { refreshToken } from "../services/auth";
+import { refreshToken } from "../../services/auth";
+import { useNavigate } from "react-router-dom";
 
-export default function HomePage({ onLogout }) {
+export default function HomePage() {
 
     const [user, setUser] = useState(null); // store user details
 
+    const navigate = useNavigate();
     // Fetch user details once on mount
     useEffect(() => {
         const fetchUser = async () => {
@@ -35,7 +37,8 @@ export default function HomePage({ onLogout }) {
     const handleLogout = ()=>{
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        onLogout();
+        navigate("/");
+        // onLogout();
     }
     const handleRefreshToken = async() => {
         try {
@@ -49,25 +52,36 @@ export default function HomePage({ onLogout }) {
     }
 
   return (
-    <div style={{ padding: "2rem", display: "flex", justifyContent: "flex-end", padding: "1rem" }}>
-      <Typography level="h1">Hi {user ? user.firstname : ""}</Typography>
-      <Grid>
-        <Button
-        sx={{ mt: 2 }}
-        onClick={handleLogout}>
+  <div
+    style={{
+      padding: "1rem 2rem",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: "#f5f5f5",
+      borderBottom: "1px solid #ddd",
+    }}
+  >
+    {/* Greeting on the left */}
+    <div>
+      <Typography level="h4">
+        Hi {user ? user.firstname : ""}
+      </Typography>
+    </div>
+
+    {/* Buttons on the right */}
+    <div style={{ display: "flex", gap: "0.75rem" }}>
+      <Button sx={{ mt: 0 }} onClick={handleLogout}>
         Logout
       </Button>
-      <Button 
-        sx={{ mt: 2 }} 
-        onClick = {handleFetchUser}>
+      <Button sx={{ mt: 0 }} onClick={handleFetchUser}>
         Profile
       </Button>
-      <Button 
-        sx={{ mt: 2 }} 
-        onClick = {handleRefreshToken}>
+      <Button sx={{ mt: 0 }} onClick={handleRefreshToken}>
         Refresh Token
       </Button>
-      </Grid>
     </div>
-  );
+  </div>
+);
+
 }

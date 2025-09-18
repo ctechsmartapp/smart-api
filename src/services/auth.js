@@ -35,3 +35,43 @@ export async function refreshToken() {
     if (!res.ok) throw new Error("Refresh Token failed");
     return res.json(); 
 }
+
+// Verify OTP API
+export async function verifyOtp(email, otp) {
+  const res = await fetch("http://localhost:5001/auth/verifyOTP", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp }),
+  });
+
+  if (!res.ok) throw new Error("OTP verification failed");
+  return res.json();
+}
+
+//Request OTP
+export async function forgotPassword(email) {
+  const res = await fetch("http://localhost:5001/auth/forgotPassword", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await res.json();
+  return { status: res.status, data }; // should contain { message: "OTP sent" }
+}
+
+// Reset password API
+export async function resetPassword(email, password) {
+  const res = await fetch("http://localhost:5001/auth/resetPassword", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.error || "Failed to reset password");
+  }
+
+  return data;
+}
