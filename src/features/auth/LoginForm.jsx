@@ -8,15 +8,15 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { setToken } = useContext(AuthContext);  
+  const { setToken, setUser } = useContext(AuthContext);  
 
   const handleSubmit = async () => {
     try {
       const data = await login(email, password);
+      setUser(data.user);
+      setToken(data.accessToken); 
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
-
-      setToken(data.accessToken); 
       navigate("/home");           
     } catch (err) {
       alert(err.message);

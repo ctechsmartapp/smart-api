@@ -1,5 +1,5 @@
 import React, { useState, useContext} from "react";
-import { FormControl, FormLabel, Input, Button, Typography } from "@mui/joy";
+import { FormControl, FormLabel, Input, Button, Typography, Select, Option } from "@mui/joy";
 import { signup } from "../../services/auth";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
@@ -10,6 +10,7 @@ export default function SignupForm() {
     password: "",
     firstname: "",
     lastname: "",
+    role:3, // Default Consultant
   });
 
   const navigate = useNavigate();
@@ -19,13 +20,17 @@ export default function SignupForm() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  const handleRoleChange = (_, value) =>
+    setForm({ ...form, role: value });
+
   const handleSubmit = async () => {
     try {
       const data = await signup(
         form.email,
         form.password,
         form.firstname,
-        form.lastname
+        form.lastname,
+        form.role
       );
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
@@ -79,6 +84,19 @@ export default function SignupForm() {
           value={form.password}
           onChange={handleChange}
         />
+      </FormControl>
+
+      <FormControl>
+        <FormLabel>Role</FormLabel>
+        <Select
+          name="role"
+          value={form.role}
+          onChange={handleRoleChange}
+        >
+          <Option value={1}>Admin</Option>
+          <Option value={2}>Marketer</Option>
+          <Option value={3}>Consultant</Option>
+        </Select>
       </FormControl>
 
       <Button sx={{ mt: 1 }} onClick={handleSubmit}>
