@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import { authenticateRefreshToken, generateAccessToken, getRefreshToken} from "../utils/authUtils.js";
 import { sendEmail, sendWelcomeEmail } from "../utils/email.js";
+import { ROLE_NAMES } from "../constants/roles.js";
 
 const router = express.Router();
 
@@ -10,10 +11,10 @@ const router = express.Router();
 router.post("/signup", async (req, res) => {
     console.log("signup req received");
     try {
-        const { email, password, firstname, lastname } = req.body;
+        const { email, password, firstname, lastname, role } = req.body;
 
         // basic validation
-        if (!(email && password && firstname && lastname)) {
+        if (!(email && password && firstname && lastname && role)) {
             return res.status(400).json({ error: "All fields are required" });
         }
 
@@ -33,11 +34,12 @@ router.post("/signup", async (req, res) => {
             password_hash: hashedPassword,
             firstname,
             lastname,
+            role
         });
 
         const accessToken = generateAccessToken(user)
         const refreshToken = getRefreshToken(user);
-
+        
         res.status(201).json({
           message: "User registered successfully",
           user: {
@@ -45,12 +47,15 @@ router.post("/signup", async (req, res) => {
             email: user.email,
             firstname: user.firstname,
             lastname: user.lastname,
+            role: ROLE_NAMES[role],
           },
           accessToken: accessToken, 
           refreshToken: refreshToken
         });
 
         await sendWelcomeEmail(user.email, user.firstname);
+        res.status(201);
+        return res;
 
     } catch (err) {
         console.error("Signup error:", err);
@@ -93,6 +98,8 @@ router.post("/login", async (req, res) => {
         email: user.email,
         firstname: user.firstname,
         lastname: user.lastname,
+        role: user.role,
+
       },
       accessToken: accessToken, 
       refreshToken: refreshToken
@@ -180,6 +187,39 @@ router.post("/verifyOTP", async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 });
+
+// Reset Password
+router.post("/resetPassword", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // OTP verified → clear fields
+    await user.update({ password_hash: hashedPassword });
+
+    const subject = "Password Changed Successful!";
+    const body = `<h3>Hi ${user.firstname},</h3>
+           <p>Your password has been updated successfully.</p>`;
+  
+    // Send email
+    sendEmail(user.email, subject, body);
+
+    return res.status(201).json({ message: "Password changed successfully" });
+
+  } catch (err) {
+    console.error("Password change error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 
 export default router;

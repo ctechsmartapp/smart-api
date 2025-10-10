@@ -46,7 +46,16 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    role: {
+      type: DataTypes.TINYINT,
+      allowNull: false,
+      defaultValue: 3, 
+      validate: {
+        isIn: [[1, 2, 3]],
+      },
+    },
   },
+
   {
     tableName: "users",
     timestamps: false, // disable default createdAt/updatedAt
