@@ -1,6 +1,6 @@
 // models/User.js
-import { DataTypes } from 'sequelize'
-import sequelize from '../config/db.js';
+import { DataTypes } from "sequelize";
+import sequelize from "../config/db.js";
 
 const User = sequelize.define(
   "User",
@@ -49,16 +49,16 @@ const User = sequelize.define(
     role: {
       type: DataTypes.TINYINT,
       allowNull: false,
-      defaultValue: 3, 
+      defaultValue: 3,
       validate: {
-        isIn: [[1, 2, 3]],
+        isIn: [[1, 2]], // 1: admin   2: marketer
       },
     },
   },
 
   {
     tableName: "users",
-    timestamps: false, // disable default createdAt/updatedAt
+    timestamps: true, // enable default createdAt/updatedAt
     underscored: true, // use snake_case columns
   }
 );
