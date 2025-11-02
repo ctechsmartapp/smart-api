@@ -6,9 +6,9 @@ import { ROLES } from "../constants/roles.js";
 
 const router = express.Router();
 
-// Get all consultants
+// Get all consultants for the given marketer
 router.get("", authenticateAccessToken, async (req, res) => {
-  console.log("Get all consultants request received");
+  console.log("Get consultants request received");
 
   try {
     const requester = req.user;
@@ -20,6 +20,9 @@ router.get("", authenticateAccessToken, async (req, res) => {
     }
 
     const consultants = await Consultant.findAll({
+      where: {
+        created_by: requester.id,
+      },
       attributes: ["id", "firstname", "lastname", "email"],
     });
 
