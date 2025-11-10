@@ -51,6 +51,9 @@ export default function Navbar() {
         }
         handleClose();
     }
+    const handleAddConsultant = async() => {
+        navigate("/add-consultant");
+    }
 
   return (
   <div
@@ -81,8 +84,10 @@ export default function Navbar() {
       <Button sx={{ mt: 0 }} onClick={handleRefreshToken}>
         Refresh Token
       </Button>
+      <Button sx={{ mt: 0 }} onClick={handleAddConsultant}>
+        Add Consultant
+      </Button>
     </div>
   </div>
 );
-
 }

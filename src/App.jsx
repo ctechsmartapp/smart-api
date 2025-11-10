@@ -14,6 +14,7 @@ import ForgotPasswordForm from "./features/auth/ForgotPasswordForm";
 import HomePage from "./features/home/HomePage";
 import OTPForm from "./features/auth/OTPForm";
 import ResetPasswordForm from "./features/auth/ResetPassword";
+import ConsultantDetails from "./features/home/ConsultantDetails";
 
 export default function App() {
   return (
@@ -73,6 +74,11 @@ export default function App() {
                   </MainLayout>
                 </PrivateRoute>
               }
+             
+            />
+             <Route
+               path="/add-consultant"
+              element={<ConsultantDetails />}
             />
           </Routes>
         </BrowserRouter>
