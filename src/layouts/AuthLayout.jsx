@@ -1,9 +1,9 @@
 import React from "react";
-import Sheet from "@mui/joy/Sheet";
+import Paper from "@mui/material/Paper";
 
 export default function AuthLayout({ children }) {
   return (
-    <Sheet
+    <Paper
       sx={{
         width: 300,
         mx: "auto",
@@ -18,6 +18,6 @@ export default function AuthLayout({ children }) {
       }}
     >
       {children}
-    </Sheet>
+    </Paper>
   );
 }

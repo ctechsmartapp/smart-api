@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { FormControl, FormLabel, Input, Button, Typography } from "@mui/joy";
+import {
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  Typography,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { forgotPassword } from "../../services/auth";
 // import your API service here
@@ -22,7 +28,6 @@ export default function ForgotPasswordForm({ onBack }) {
   //   }
   // };
   const handleSubmit = async () => {
-    
     try {
       const { status, data } = await forgotPassword(email);
 

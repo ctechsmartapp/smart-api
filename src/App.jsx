@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CssVarsProvider } from "@mui/joy/styles";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -15,9 +15,26 @@ import HomePage from "./features/home/HomePage";
 import OTPForm from "./features/auth/OTPForm";
 import ResetPasswordForm from "./features/auth/ResetPassword";
 
+// ✅ Create a Material theme
+const theme = createTheme({
+  palette: {
+    mode: "light", // or 'dark'
+    primary: {
+      main: "#1976d2",
+    },
+    secondary: {
+      main: "#dc004e",
+    },
+  },
+  typography: {
+    fontFamily: "Roboto, Arial, sans-serif",
+  },
+});
+
 export default function App() {
   return (
-    <CssVarsProvider>
+    // ✅ Pass the theme to ThemeProvider
+    <ThemeProvider theme={theme}>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
@@ -58,7 +75,7 @@ export default function App() {
               path="/reset-password"
               element={
                 <AuthLayout>
-                  <ResetPasswordForm/>
+                  <ResetPasswordForm />
                 </AuthLayout>
               }
             />
@@ -77,6 +94,6 @@ export default function App() {
           </Routes>
         </BrowserRouter>
       </AuthProvider>
-    </CssVarsProvider>
+    </ThemeProvider>
   );
 }

@@ -14,98 +14,95 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Grid,
   IconButton,
+  Grid,
 } from "@mui/material";
-
-import { Edit, Delete, Add, Visibility } from "@mui/icons-material";
+import { Add, Edit, Delete, Visibility } from "@mui/icons-material";
 import { ErrorBoundary } from "react-error-boundary";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
-import { getAllConsultants } from "../../services/user.js";
-import { deleteConsultant } from "../../services/consultant.js";
-import ConsultantForm from "./ConsultantForm.jsx";
-import ConsultantDetails from "./ConsultantDetails.jsx"; // ⬅ ADD THIS
+import { getAllSubmissions } from "../../services/submission.js";
+import { deleteSubmission } from "../../services/submission.js";
+import SubmissionForm from "./SubmissionForm.jsx";
+import SubmissionDetails from "./SubmissionDetails.jsx";
 
 const theme = createTheme({
   palette: { mode: "light" },
 });
 
-const ConsultantList = () => {
-  const [consultants, setConsultants] = useState([]);
+const SubmissionList = () => {
+  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // FOR SWITCHING TO DETAILS VIEW
-  const [selectedConsultantId, setSelectedConsultantId] = useState(null);
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState(null);
 
-  // Form dialog
   const [open, setOpen] = useState(false);
-  const [editConsultant, setEditConsultant] = useState(null);
+  const [editSubmission, setEditSubmission] = useState(null);
 
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  // Fetch consultants
-  const fetchConsultants = async () => {
+  const fetchSubmissions = async () => {
     try {
       setLoading(true);
-      const response = await getAllConsultants();
-      setConsultants(
-        Array.isArray(response.consultants) ? response.consultants : []
+      const response = await getAllSubmissions();
+      setSubmissions(
+        Array.isArray(response.submissions) ? response.submissions : []
       );
     } catch (error) {
-      console.error("Error fetching consultants:", error);
+      console.error("Error fetching submissions:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchConsultants();
+    fetchSubmissions();
   }, []);
 
-  // OPEN CONSULTANT DETAILS COMPONENT
   const viewDetails = (id) => {
-    setSelectedConsultantId(id);
+    setSelectedSubmissionId(id);
   };
 
   const handleDelete = async () => {
     try {
-      const response = await deleteConsultant(deleteConfirm.id);
+      const response = await deleteSubmission(deleteConfirm.id);
 
       if (response.errorCode && response.errorCode !== 200) {
-        alert(response.errorMessage || "Failed to delete consultant");
+        alert(response.errorMessage || "Failed to delete submission");
         return;
       }
 
       setDeleteConfirm(null);
-      fetchConsultants();
+      fetchSubmissions();
     } catch (error) {
-      console.error("Error deleting consultant:", error);
-      alert("Failed to delete consultant");
+      console.error("Error deleting submission:", error);
+      alert("Failed to delete submission");
     }
   };
 
   const handleFormClose = () => {
     setOpen(false);
-    setEditConsultant(null);
-    fetchConsultants(); // reload list after add/edit
+    setEditSubmission(null);
+    fetchSubmissions();
   };
 
-  // 🔥 SHOW DETAILS VIEW IF SELECTED
-  if (selectedConsultantId) {
+  if (selectedSubmissionId) {
     return (
-      <ConsultantDetails
-        consultantId={selectedConsultantId}
-        onBack={() => setSelectedConsultantId(null)}
-        onRefresh={fetchConsultants}
+      <SubmissionDetails
+        submissionId={selectedSubmissionId}
+        onBack={() => setSelectedSubmissionId(null)}
+        onRefresh={fetchSubmissions}
+        onEdit={(submission) => {
+          setEditSubmission(submission);
+          setOpen(true);
+        }}
       />
     );
   }
 
-  // 🔥 Otherwise show the consultant list
   if (loading)
-    return <Typography sx={{ mt: 4 }}>Loading consultants...</Typography>;
+    return <Typography sx={{ mt: 4 }}>Loading submissions...</Typography>;
 
   return (
     <ThemeProvider theme={theme}>
@@ -119,26 +116,26 @@ const ConsultantList = () => {
             sx={{ mb: 2 }}
           >
             <Typography variant="h5" fontWeight="bold">
-              Consultant List
+              Submissions List
             </Typography>
 
             <Button
               variant="contained"
               startIcon={<Add />}
               onClick={() => {
-                setEditConsultant(null);
+                setEditSubmission(null);
                 setOpen(true);
               }}
             >
-              Add Consultant
+              Add Submission
             </Button>
 
             <Typography variant="subtitle2">
-              Showing {consultants.length} consultants
+              Showing {submissions.length} submissions
             </Typography>
           </Grid>
 
-          {consultants.length > 0 && (
+          {submissions.length > 0 && (
             <TableContainer
               component={Paper}
               sx={{ border: "1px solid #ccc", borderRadius: 2 }}
@@ -150,10 +147,19 @@ const ConsultantList = () => {
                       <strong>Sr.</strong>
                     </TableCell>
                     <TableCell>
-                      <strong>Name</strong>
+                      <strong>Technology</strong>
                     </TableCell>
                     <TableCell>
-                      <strong>Email</strong>
+                      <strong>Consultant</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Vendor</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Client</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Interview Date</strong>
                     </TableCell>
                     <TableCell>
                       <strong>Created At</strong>
@@ -165,30 +171,35 @@ const ConsultantList = () => {
                 </TableHead>
 
                 <TableBody>
-                  {consultants.map((consultant, i) => (
-                    <TableRow key={consultant.id}>
+                  {submissions.map((submission, i) => (
+                    <TableRow key={submission.id}>
                       <TableCell>{i + 1}</TableCell>
-
+                      <TableCell>{submission.technology}</TableCell>
+                      <TableCell>{submission.consultant}</TableCell>
+                      <TableCell>{submission.vendor}</TableCell>
+                      <TableCell>{submission.client}</TableCell>
                       <TableCell>
-                        {consultant.firstname} {consultant.lastname}
+                        {submission.interview_date
+                          ? new Date(
+                              submission.interview_date.replace(" ", "T")
+                            ).toLocaleDateString()
+                          : "N/A"}
                       </TableCell>
-
-                      <TableCell>{consultant.email}</TableCell>
-
                       <TableCell>
-                        {new Date(
-                          consultant.created_at.replace(" ", "T")
-                        ).toLocaleDateString()}
+                        {submission.created_at
+                          ? new Date(
+                              submission.created_at.replace(" ", "T")
+                            ).toLocaleDateString()
+                          : "N/A"}
                       </TableCell>
-
                       <TableCell>
-                        <IconButton onClick={() => viewDetails(consultant.id)}>
+                        <IconButton onClick={() => viewDetails(submission.id)}>
                           <Visibility />
                         </IconButton>
 
                         <IconButton
                           onClick={() => {
-                            setEditConsultant(consultant);
+                            setEditSubmission(submission);
                             setOpen(true);
                           }}
                         >
@@ -196,7 +207,7 @@ const ConsultantList = () => {
                         </IconButton>
 
                         <IconButton
-                          onClick={() => setDeleteConfirm(consultant)}
+                          onClick={() => setDeleteConfirm(submission)}
                         >
                           <Delete />
                         </IconButton>
@@ -212,11 +223,8 @@ const ConsultantList = () => {
           <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)}>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogContent>
-              Are you sure you want to delete{" "}
-              <strong>
-                {deleteConfirm?.firstname} {deleteConfirm?.lastname}
-              </strong>
-              ?
+              Are you sure you want to delete the submission for{" "}
+              <strong>{deleteConfirm?.technology}</strong>?
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setDeleteConfirm(null)}>Cancel</Button>
@@ -226,10 +234,10 @@ const ConsultantList = () => {
             </DialogActions>
           </Dialog>
 
-          {/* ADD / EDIT CONSULTANT FORM */}
-          <ConsultantForm
+          {/* ADD / EDIT FORM */}
+          <SubmissionForm
             open={open}
-            consultant={editConsultant}
+            submission={editSubmission}
             onClose={handleFormClose}
           />
         </Box>
@@ -238,4 +246,4 @@ const ConsultantList = () => {
   );
 };
 
-export default ConsultantList;
+export default SubmissionList;

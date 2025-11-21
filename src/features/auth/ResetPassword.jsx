@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { FormControl, FormLabel, Input, Button, Typography } from "@mui/joy";
+import {
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  Typography,
+} from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { resetPassword } from "../../services/auth";
 

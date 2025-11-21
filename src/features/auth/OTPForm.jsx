@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { FormControl, FormLabel, Input, Button, Typography } from "@mui/joy";
+import {
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  Typography,
+} from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { verifyOtp } from "../../services/auth";
 
@@ -9,7 +15,6 @@ export default function OTPForm() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  
   const email = location.state?.email;
 
   const handleSubmit = async () => {
@@ -57,7 +62,11 @@ export default function OTPForm() {
         </Typography>
       )}
 
-      <Button sx={{ mt: 2, width: "100%" }} onClick={handleSubmit} disabled={!otp}>
+      <Button
+        sx={{ mt: 2, width: "100%" }}
+        onClick={handleSubmit}
+        disabled={!otp}
+      >
         Verify OTP
       </Button>
     </div>

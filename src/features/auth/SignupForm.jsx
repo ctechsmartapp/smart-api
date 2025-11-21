@@ -1,5 +1,13 @@
-import React, { useState, useContext} from "react";
-import { FormControl, FormLabel, Input, Button, Typography, Select, Option } from "@mui/joy";
+import React, { useState, useContext } from "react";
+import {
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  Typography,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import { signup } from "../../services/auth";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
@@ -10,18 +18,16 @@ export default function SignupForm() {
     password: "",
     firstname: "",
     lastname: "",
-    role:3, // Default Consultant
+    role: 3, // Default Consultant
   });
 
   const navigate = useNavigate();
   const { setToken } = useContext(AuthContext);
-  
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleRoleChange = (_, value) =>
-    setForm({ ...form, role: value });
+  const handleRoleChange = (_, value) => setForm({ ...form, role: value });
 
   const handleSubmit = async () => {
     try {
@@ -35,7 +41,7 @@ export default function SignupForm() {
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       setToken(data.accessToken);
-      navigate("/home"); 
+      navigate("/home");
     } catch (err) {
       alert(err.message);
     }
@@ -59,11 +65,7 @@ export default function SignupForm() {
 
       <FormControl>
         <FormLabel>Last Name</FormLabel>
-        <Input
-          name="lastname"
-          value={form.lastname}
-          onChange={handleChange}
-        />
+        <Input name="lastname" value={form.lastname} onChange={handleChange} />
       </FormControl>
 
       <FormControl>
@@ -86,18 +88,14 @@ export default function SignupForm() {
         />
       </FormControl>
 
-      <FormControl>
+      {/* <FormControl>
         <FormLabel>Role</FormLabel>
-        <Select
-          name="role"
-          value={form.role}
-          onChange={handleRoleChange}
-        >
-          <Option value={1}>Admin</Option>
-          <Option value={2}>Marketer</Option>
-          <Option value={3}>Consultant</Option>
+        <Select name="role" value={form.role} onChange={handleRoleChange}>
+          <MenuItem value={1}>Admin</MenuItem>
+          <MenuItem value={2}>Marketer</MenuItem>
+          <MenuItem value={3}>Consultant</MenuItem>
         </Select>
-      </FormControl>
+      </FormControl> */}
 
       <Button sx={{ mt: 1 }} onClick={handleSubmit}>
         Sign up
