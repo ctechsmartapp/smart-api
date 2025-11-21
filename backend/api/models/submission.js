@@ -2,6 +2,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 import Consultant from "./consultant.js";
+import User from "./user.js";
 
 const Submission = sequelize.define(
   "Submission",
@@ -39,6 +40,28 @@ const Submission = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    created_by: {
+      type: DataTypes.BIGINT,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_by: {
+      type: DataTypes.BIGINT,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
   },
   {
     tableName: "submissions",
@@ -50,5 +73,8 @@ const Submission = sequelize.define(
 // Associations
 Submission.belongsTo(Consultant, { foreignKey: "consultant_id" });
 Consultant.hasMany(Submission, { foreignKey: "consultant_id" });
+Submission.belongsTo(User, { as: "creator", foreignKey: "created_by" });
+Submission.belongsTo(User, { as: "updater", foreignKey: "updated_by" });
+User.hasMany(Submission, { foreignKey: "consultant_id" });
 
 export default Submission;

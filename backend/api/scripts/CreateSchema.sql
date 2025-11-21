@@ -48,5 +48,9 @@ CREATE TABLE `submissions` (
   `client` VARCHAR(255) NOT NULL,
   `interview_date` DATETIME,
   `comments` VARCHAR(255),
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `created_by` INT  NOT NULL,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` INT NOT NULL,
   FOREIGN KEY (`consultant_id`) REFERENCES `consultants` (`id`) ON DELETE CASCADE
 );
