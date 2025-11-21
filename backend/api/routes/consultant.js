@@ -101,15 +101,19 @@ router.post("", authenticateAccessToken, async (req, res) => {
     }
 
     // check if user exists
-    const existingUser = await Consultant.findOne({ where: { email } });
-    if (existingUser) {
+    const existingUserWithEmail = await Consultant.findOne({
+      where: { email },
+    });
+    if (existingUserWithEmail) {
       return res
         .status(409)
         .json({ error: "Consultant already exists with this email." });
     }
 
-    existingUser = await Consultant.findOne({ where: { phone } });
-    if (existingUser) {
+    const existingUserWithPhone = await Consultant.findOne({
+      where: { phone },
+    });
+    if (existingUserWithPhone) {
       return res
         .status(409)
         .json({ error: "Consultant already exists with this phone number." });
