@@ -8,8 +8,13 @@ import {
   Grid,
   TextField,
   Alert,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import { addSubmission, updateSubmission } from "../../services/submission.js";
+import { getAllConsultants } from "../../services/user.js";
 
 const SubmissionForm = ({ open, onClose, submission }) => {
   const [formData, setFormData] = useState({
@@ -24,6 +29,26 @@ const SubmissionForm = ({ open, onClose, submission }) => {
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [consultants, setConsultants] = useState([]);
+
+  // Load all consultants once on mount
+  useEffect(() => {
+    const fetchConsultants = async () => {
+      try {
+        const data = await getAllConsultants();
+        // console.log(data);
+        setConsultants(
+          Array.isArray(data.consultants)
+            ? data.consultants
+            : data?.data.consultants || []
+        );
+      } catch (err) {
+        console.error("Error fetching consultants:", err);
+        setApiError("Failed to load consultants");
+      }
+    };
+    fetchConsultants();
+  }, []);
 
   // Load existing submission data in edit mode
   useEffect(() => {
@@ -73,20 +98,16 @@ const SubmissionForm = ({ open, onClose, submission }) => {
 
     setLoading(true);
     try {
-      const userId = localStorage.getItem("userId"); // Or from context/auth
-
       if (submission) {
         // Edit
         await updateSubmission(submission.id, {
           ...formData,
-          updated_by: userId,
         });
       } else {
         // Add
         await addSubmission({
           ...formData,
-          created_by: userId,
-          updated_by: userId,
+          consultant_id: formData.consultant,
         });
       }
       onClose();
@@ -122,18 +143,38 @@ const SubmissionForm = ({ open, onClose, submission }) => {
               required
             />
           </Grid>
+
+          {/* Consultant dropdown */}
           <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Consultant"
-              name="consultant"
-              value={formData.consultant}
-              onChange={handleChange}
-              error={!!errors.consultant}
-              helperText={errors.consultant}
-              required
-            />
+            <FormControl fullWidth error={!!errors.consultant} required>
+              <InputLabel id="consultant-label">Consultant</InputLabel>
+              <Select
+                labelId="consultant-label"
+                name="consultant"
+                value={formData.consultant || ""} // will store the id
+                onChange={handleChange}
+              >
+                {consultants.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.firstname + " " + c.lastname}{" "}
+                    {/* Display name, value is id */}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.consultant && (
+                <p
+                  style={{
+                    color: "#d32f2f",
+                    margin: "3px 14px 0 14px",
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  {errors.consultant}
+                </p>
+              )}
+            </FormControl>
           </Grid>
+
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth

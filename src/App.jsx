@@ -14,6 +14,7 @@ import ForgotPasswordForm from "./features/auth/ForgotPasswordForm";
 import HomePage from "./features/home/HomePage";
 import OTPForm from "./features/auth/OTPForm";
 import ResetPasswordForm from "./features/auth/ResetPassword";
+import SubmissionList from "./features/home/SubmissionsList";
 
 // ✅ Create a Material theme
 const theme = createTheme({
@@ -77,6 +78,16 @@ export default function App() {
                 <AuthLayout>
                   <ResetPasswordForm />
                 </AuthLayout>
+              }
+            />
+            <Route
+              path="/submissions"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <SubmissionList />
+                  </MainLayout>
+                </PrivateRoute>
               }
             />
 

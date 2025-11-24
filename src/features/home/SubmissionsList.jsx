@@ -108,39 +108,55 @@ const SubmissionList = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <ErrorBoundary fallback={<div>Something went wrong.</div>}>
-        <Box sx={{ p: 3 }}>
-          <Grid
-            container
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 2 }}
-          >
-            <Typography variant="h5" fontWeight="bold">
-              Submissions List
-            </Typography>
+        <Box sx={{ p: 3, width: "100%", maxWidth: "100%" }}>
+          <Grid container alignItems="center" sx={{ mb: 2 }} spacing={2}>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h5" fontWeight="bold">
+                Submissions List
+              </Typography>
+            </Grid>
 
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => {
-                setEditSubmission(null);
-                setOpen(true);
-              }}
+            <Grid
+              item
+              xs={12}
+              md={4}
+              sx={{ textAlign: { xs: "left", md: "center" } }}
             >
-              Add Submission
-            </Button>
+              <Typography variant="subtitle2">
+                Showing {submissions.length} submissions
+              </Typography>
+            </Grid>
 
-            <Typography variant="subtitle2">
-              Showing {submissions.length} submissions
-            </Typography>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              sx={{ textAlign: { xs: "left", md: "right" } }}
+            >
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => {
+                  setEditSubmission(null);
+                  setOpen(true);
+                }}
+              >
+                Add Submission
+              </Button>
+            </Grid>
           </Grid>
 
           {submissions.length > 0 && (
             <TableContainer
               component={Paper}
-              sx={{ border: "1px solid #ccc", borderRadius: 2 }}
+              sx={{
+                border: "1px solid #ccc",
+                borderRadius: 2,
+                width: "100%",
+                overflowX: "auto",
+              }}
             >
-              <Table size="small">
+              <Table size="small" sx={{ minWidth: 900, width: "100%" }}>
                 <TableHead sx={{ backgroundColor: "#78909c" }}>
                   <TableRow>
                     <TableCell>
@@ -175,7 +191,11 @@ const SubmissionList = () => {
                     <TableRow key={submission.id}>
                       <TableCell>{i + 1}</TableCell>
                       <TableCell>{submission.technology}</TableCell>
-                      <TableCell>{submission.consultant}</TableCell>
+                      <TableCell>
+                        {submission.Consultant.firstname +
+                          " " +
+                          submission.Consultant.lastname}
+                      </TableCell>
                       <TableCell>{submission.vendor}</TableCell>
                       <TableCell>{submission.client}</TableCell>
                       <TableCell>

@@ -59,7 +59,10 @@ export default function Navbar() {
 
       {/* Buttons on the right */}
       <div style={{ display: "flex", gap: "0.75rem" }}>
-        <Button sx={{ mt: 0 }}>My Submissions</Button>
+        {/* <Button sx={{ mt: 0 }}>My Submissions</Button> */}
+        <Button sx={{ mt: 0 }} onClick={() => navigate("/submissions")}>
+          My Submissions
+        </Button>
         <Button sx={{ mt: 0 }} onClick={handleFetchUser}>
           Profile
         </Button>
