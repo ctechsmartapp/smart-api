@@ -2,6 +2,7 @@ import express from "express";
 import Submission from "../models/submission.js";
 import { authenticateAccessToken } from "../utils/authUtils.js";
 import { ROLES } from "../constants/roles.js";
+import Consultant from "../models/consultant.js";
 
 const router = express.Router();
 
@@ -15,8 +16,16 @@ router.post("", authenticateAccessToken, async (req, res) => {
         error: "Access denied. Only marketers can perform this action.",
       });
     }
-
-    const { consultant_id, technology, vendor, client, comments } = req.body;
+    console.log("Create Submission request received");
+    console.log(req.body);
+    const {
+      consultant_id,
+      technology,
+      vendor,
+      client,
+      comments,
+      interview_date,
+    } = req.body;
 
     // basic validation
     if (!(consultant_id && technology && vendor && client)) {
@@ -29,6 +38,7 @@ router.post("", authenticateAccessToken, async (req, res) => {
       technology,
       vendor,
       client,
+      interview_date: interview_date ? interview_date : null,
       comments,
       created_by: requester.id,
       updated_by: requester.id,
@@ -47,24 +57,31 @@ router.post("", authenticateAccessToken, async (req, res) => {
 // Get all submissions for a marketer
 router.get("", authenticateAccessToken, async (req, res) => {
   console.log("Get submissions request received");
-  let submissions = [];
 
   try {
     const requester = req.user;
-    // Check if the requester has a role Marketer
+    let whereCondition = {};
+
     if (requester.role === ROLES.MARKETER) {
-      submissions = await Submission.findAll({
-        where: { created_by: requester.id },
-      });
-      console.log(submissions);
-    } else if (requester.role === ROLES.ADMIN) {
-      submissions = await Submission.findAll();
-    } else {
+      whereCondition = { created_by: requester.id };
+    } else if (requester.role !== ROLES.ADMIN) {
       return res.status(403).json({
         error:
           "Access denied. Only marketers and admins can perform this action.",
       });
     }
+
+    // Fetch submissions with consultant info
+    const submissions = await Submission.findAll({
+      where: whereCondition,
+      include: [
+        {
+          model: Consultant,
+          attributes: ["id", "firstname", "lastname"], // fetch only id and name
+        },
+      ],
+      order: [["created_at", "DESC"]],
+    });
 
     if (submissions.length === 0) {
       return res
@@ -74,7 +91,7 @@ router.get("", authenticateAccessToken, async (req, res) => {
 
     res.status(200).json({
       message: "Submissions retrieved successfully",
-      submissions,
+      submissions: submissions,
     });
   } catch (err) {
     console.error("Error fetching submissions:", err);
@@ -148,6 +165,50 @@ router.patch("/:id", authenticateAccessToken, async (req, res) => {
     }
   } catch (err) {
     console.error("Error fetching submission:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Delete a submission by id
+router.delete("/:id", authenticateAccessToken, async (req, res) => {
+  console.log("Delete submission request received");
+
+  try {
+    const requester = req.user;
+
+    // Only MARKETER or ADMIN can delete
+    if (requester.role !== ROLES.MARKETER && requester.role !== ROLES.ADMIN) {
+      return res.status(403).json({
+        error:
+          "Access denied. Only marketers and admins can perform this action.",
+      });
+    }
+
+    const { id } = req.params;
+
+    // Find the submission
+    const submission = await Submission.findByPk(id);
+
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found" });
+    }
+
+    // Optional: restrict marketers to delete only their own submissions
+    if (
+      requester.role === ROLES.MARKETER &&
+      submission.created_by !== requester.id
+    ) {
+      return res.status(403).json({
+        error: "Marketers can only delete their own submissions.",
+      });
+    }
+
+    // Delete the submission
+    await submission.destroy();
+
+    res.status(200).json({ message: "Submission deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting submission:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
